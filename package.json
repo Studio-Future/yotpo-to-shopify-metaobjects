@@ -1,0 +1,21 @@
+{
+  "name": "yotpo-to-shopify-sync",
+  "version": "1.0.0",
+  "description": "Sync Yotpo reviews to Shopify metaobjects",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "setup": "node src/setup-metaobject-definition.js",
+    "setup:statistics": "node src/setup-statistics-definition.js",
+    "sync": "node src/sync.js",
+    "sync:statistics": "node src/sync-statistics.js"
+  },
+  "keywords": ["yotpo", "shopify", "reviews", "metaobjects", "sync"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@shopify/shopify-api": "^11.0.0",
+    "dotenv": "^16.4.7",
+    "node-fetch": "^3.3.2"
+  }
+}
