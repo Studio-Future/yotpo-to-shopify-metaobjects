@@ -13,7 +13,8 @@ async function syncReviews() {
   // Initialize clients
   const yotpoClient = new YotpoClient(
     process.env.YOTPO_APP_KEY,
-    process.env.YOTPO_APP_SECRET
+    process.env.YOTPO_USER_TOKEN || process.env.YOTPO_APP_SECRET,
+    !!process.env.YOTPO_USER_TOKEN
   );
 
   const shopifyClient = new ShopifyClient(
@@ -84,6 +85,12 @@ async function syncReviews() {
     await productMapper.buildProductCache();
     const cacheStats = productMapper.getCacheStats();
     console.log(`✓ Ready to map reviews to products\n`);
+
+    // Step 3.5: Build metaobject cache for fast lookups
+    console.log('💾 Step 3.5: Building metaobject cache...');
+    await shopifyClient.buildMetaobjectCache('yotpo_product_review');
+    await shopifyClient.buildMetaobjectCache('yotpo_brand_review');
+    console.log(`✓ Metaobject cache ready\n`);
 
     // Step 4: Separate reviews by type
     console.log('📊 Step 4: Categorizing reviews...');
