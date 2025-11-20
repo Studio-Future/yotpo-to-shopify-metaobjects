@@ -215,9 +215,8 @@ The script includes automatic rate limiting to stay within API limits:
 
 **Shopify API errors:**
 - Confirm your access token is valid
-- Verify your app has the required scopes (including `read_products` for SKU mapping)
+- Verify your app has the required scopes
 - Check your shop URL format (`yourstore.myshopify.com`)
-- If you get "Access denied for products field", add the `read_products` scope to your app
 
 **Metaobject definition errors:**
 - If definitions already exist, skip setup and run `npm run sync` directly
