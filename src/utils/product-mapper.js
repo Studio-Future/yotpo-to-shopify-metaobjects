@@ -54,37 +54,55 @@ export class ProductMapper {
     let hasNextPage = true;
     let cursor = null;
     let totalProducts = 0;
+    let pageCount = 0;
 
     while (hasNextPage) {
-      const data = await this.shopifyClient.graphqlRequest(query, { cursor });
+      pageCount++;
 
-      data.products.edges.forEach(({ node: product }) => {
-        const productData = {
-          productId: product.id,
-          productTitle: product.title,
-          variantIds: [],
-        };
+      try {
+        const data = await this.shopifyClient.graphqlRequest(query, { cursor });
 
-        // Extract numeric ID for Yotpo matching
-        const numericId = this.extractNumericId(product.id);
-        if (numericId) {
-          this.idToProductCache.set(numericId, productData);
-        }
+        const productsInBatch = data.products.edges.length;
 
-        // Also map by variant SKUs
-        product.variants.edges.forEach(({ node: variant }) => {
-          productData.variantIds.push(variant.id);
+        data.products.edges.forEach(({ node: product }) => {
+          const productData = {
+            productId: product.id,
+            productTitle: product.title,
+            variantIds: [],
+          };
 
-          if (variant.sku) {
-            this.skuToProductCache.set(variant.sku, productData);
+          // Extract numeric ID for Yotpo matching
+          const numericId = this.extractNumericId(product.id);
+          if (numericId) {
+            this.idToProductCache.set(numericId, productData);
           }
+
+          // Also map by variant SKUs
+          product.variants.edges.forEach(({ node: variant }) => {
+            productData.variantIds.push(variant.id);
+
+            if (variant.sku) {
+              this.skuToProductCache.set(variant.sku, productData);
+            }
+          });
+
+          totalProducts++;
         });
 
-        totalProducts++;
-      });
+        hasNextPage = data.products.pageInfo.hasNextPage;
+        cursor = data.products.pageInfo.endCursor;
 
-      hasNextPage = data.products.pageInfo.hasNextPage;
-      cursor = data.products.pageInfo.endCursor;
+        // Log progress
+        console.log(`  Fetched page ${pageCount}: ${productsInBatch} products (total: ${totalProducts})`);
+
+        // Rate limiting: pause between requests to avoid throttling
+        if (hasNextPage) {
+          await new Promise(resolve => setTimeout(resolve, 500)); // 500ms delay
+        }
+      } catch (error) {
+        console.error(`  Error fetching page ${pageCount}:`, error.message);
+        throw error;
+      }
     }
 
     this.cacheFetched = true;
