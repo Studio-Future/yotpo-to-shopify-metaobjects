@@ -1,14 +1,32 @@
 import fetch from 'node-fetch';
 
 export class YotpoClient {
-  constructor(appKey, appSecret) {
+  constructor(appKey, appSecretOrUserToken = null, isUserToken = false) {
     this.appKey = appKey;
-    this.appSecret = appSecret;
     this.baseUrl = 'https://api.yotpo.com';
-    this.token = null;
+
+    // If isUserToken is explicitly true, or if the value looks like it should be treated as a token
+    if (isUserToken || (appSecretOrUserToken !== null && appSecretOrUserToken.length >= 40)) {
+      // Use as user token directly
+      this.appSecret = null;
+      this.token = appSecretOrUserToken;
+    } else {
+      // Use as app secret (requires authentication)
+      this.appSecret = appSecretOrUserToken;
+      this.token = null;
+    }
   }
 
   async authenticate() {
+    // If we already have a token provided, skip authentication
+    if (this.token) {
+      return this.token;
+    }
+
+    if (!this.appSecret) {
+      throw new Error('Cannot authenticate: no app secret or user token provided');
+    }
+
     const response = await fetch(`${this.baseUrl}/oauth/token`, {
       method: 'POST',
       headers: {
