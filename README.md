@@ -17,6 +17,7 @@ For Shopify, your custom app needs these API scopes:
 - `write_metaobject_definitions`
 - `read_metaobjects`
 - `write_metaobjects`
+- `read_products`
 
 ## Installation
 
