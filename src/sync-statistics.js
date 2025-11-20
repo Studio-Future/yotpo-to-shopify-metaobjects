@@ -19,7 +19,8 @@ export async function syncReviewStatistics(yotpoReviews = null, shopifyClient = 
   if (!reviews) {
     const yotpoClient = new YotpoClient(
       process.env.YOTPO_APP_KEY,
-      process.env.YOTPO_APP_SECRET
+      process.env.YOTPO_USER_TOKEN || process.env.YOTPO_APP_SECRET,
+      !!process.env.YOTPO_USER_TOKEN
     );
 
     console.log('📥 Fetching reviews from Yotpo...');
